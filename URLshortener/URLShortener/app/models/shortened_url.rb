@@ -3,7 +3,7 @@ class ShortenedUrl < ApplicationRecord
   validates :long_url, presence: true
   validates :user_id, presence: true
 
-  # attr_accessor :short_url, :long_url, :user_id
+
 
   def self.random_code
     return_string = SecureRandom::urlsafe_base64
@@ -21,5 +21,23 @@ class ShortenedUrl < ApplicationRecord
     primary_key: :id,
     foreign_key: :user_id,
     class_name: 'User'
+
+  has_many :visits,
+    primary_key: :id,
+    foreign_key: :url_id,
+    class_name: 'Visit'
+
+
+  has_many :users,
+  through: :visits,
+  source: :user
+
+  def num_clicks
+    Visit.where(:url_id => self.id).count
+  end
+
+  def num_uniques
+    Visit.where(:url_id => self.id).group(:user_id).count
+  end
 
 end
